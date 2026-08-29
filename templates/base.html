@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}NetSage AI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">N</div><div><strong>NetSage AI</strong><span>Network Intelligence</span></div></div>
+    <nav>
+      <a class="{{ 'active' if active=='dashboard' else '' }}" href="/">Dashboard</a>
+      <a class="{{ 'active' if active=='cases' else '' }}" href="/cases">Troubleshooting Cases</a>
+      <a href="/cases#workflow">AI Workflow</a>
+    </nav>
+    <div class="side-note">
+      <div class="tiny-label">PROJECT MODE</div>
+      <div class="mode-pill">Local Demonstration</div>
+      <p>AI assists diagnosis. Human approval remains final.</p>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">APPLIED AI + NETWORK TROUBLESHOOTING</div><h1>{% block heading %}NetSage AI{% endblock %}</h1></div>
+      <div class="top-actions"><span class="status-dot"></span><span>System Ready</span></div>
+    </header>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

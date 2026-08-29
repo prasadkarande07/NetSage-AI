@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}NetSage AI — Cases{% endblock %}
+{% block heading %}Troubleshooting Cases{% endblock %}
+{% block content %}
+<div class="toolbar"><div><p class="muted">Select a case to view evidence, Python findings, AI diagnosis, and human-review controls.</p></div><input id="caseSearch" placeholder="Search cases, concepts, or faults…"></div>
+<section class="case-cards">
+{% for c in cases %}
+  <a class="case-card" href="/case/{{ c.id }}" data-search="{{ (c.id+' '+c.fault+' '+c.concept+' '+c.symptom)|lower }}">
+    <div class="card-top"><span class="case-id">{{ c.id }}</span><span class="sev {{ c.severity|lower }}">{{ c.severity }}</span></div>
+    <h3>{{ c.fault }}</h3><p>{{ c.symptom }}</p>
+    <div class="chips"><span>{{ c.layer }}</span><span>{{ c.concept }}</span></div>
+    <div class="card-foot"><span>Open case</span><b>→</b></div>
+  </a>
+{% endfor %}
+</section>
+{% endblock %}

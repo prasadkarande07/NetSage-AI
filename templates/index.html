@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}NetSage AI — Dashboard{% endblock %}
+{% block heading %}Troubleshooting Command Center{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <div class="eyebrow">AI-ASSISTED NETWORK TROUBLESHOOTING</div>
+    <h2>From network symptom to verified fix.</h2>
+    <p>NetSage AI combines Packet Tracer evidence, deterministic Python checks, AI-assisted diagnosis, and human review into one demonstrable workflow.</p>
+    <div class="hero-actions"><a class="btn primary" href="/cases">Explore 10 cases</a><a class="btn ghost" href="#workflow">View workflow</a></div>
+  </div>
+  <div class="hero-graphic"><div class="orb">AI</div><div class="flow-mini"><span>Evidence</span><b>→</b><span>Python</span><b>→</b><span>AI</span><b>→</b><span>Human</span></div></div>
+</section>
+
+<section class="metrics">
+  <div class="metric"><span>Total Cases</span><strong>{{ cases|length }}</strong><small>curated troubleshooting scenarios</small></div>
+  <div class="metric"><span>High Severity</span><strong>{{ cases|selectattr('severity','equalto','High')|list|length }}</strong><small>priority scenarios</small></div>
+  <div class="metric"><span>Concepts</span><strong>{{ cases|map(attribute='concept')|unique|list|length }}</strong><small>networking concepts</small></div>
+  <div class="metric"><span>Workflow</span><strong>5-stage</strong><small>evidence → verification</small></div>
+</section>
+
+<section class="panel-grid">
+  <div class="panel wide" id="workflow">
+    <div class="panel-head"><div><span class="eyebrow">SYSTEM ARCHITECTURE</span><h3>NetSage troubleshooting loop</h3></div></div>
+    <div class="workflow">
+      <div class="wf-step"><span>01</span><b>Packet Tracer</b><small>Intentional fault + symptoms</small></div><i>→</i>
+      <div class="wf-step"><span>02</span><b>Evidence</b><small>Show commands + configs</small></div><i>→</i>
+      <div class="wf-step"><span>03</span><b>Python Rules</b><small>Deterministic cross-check</small></div><i>→</i>
+      <div class="wf-step"><span>04</span><b>AI Diagnosis</b><small>Explain likely root cause</small></div><i>→</i>
+      <div class="wf-step"><span>05</span><b>Human Review</b><small>Accept / Edit / Reject</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><span class="eyebrow">CASE OVERVIEW</span><h3>All troubleshooting cases</h3></div><a href="/cases">View all →</a></div>
+  <div class="case-table">
+    {% for c in cases %}
+    <a class="case-row" href="/case/{{ c.id }}">
+      <span class="case-id">{{ c.id }}</span><span class="case-name">{{ c.fault }}</span><span class="muted">{{ c.concept }}</span><span class="layer">{{ c.layer }}</span><span class="sev {{ c.severity|lower }}">{{ c.severity }}</span><span class="arrow">→</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
