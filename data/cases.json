@@ -1,0 +1,172 @@
+[
+  {
+    "id": "C01",
+    "fault": "Duplicate IP",
+    "layer": "Layer 3",
+    "concept": "IPv4 Addressing",
+    "severity": "High",
+    "symptom": "Two endpoints are configured with the same IPv4 address, causing ambiguous or unreliable communication.",
+    "expected_fault": "Duplicate IP address",
+    "evidence": [
+      "PC1 IP configuration shows 192.168.10.10",
+      "PC2 IP configuration shows 192.168.10.10",
+      "ipconfig output from both PCs"
+    ],
+    "ai": "The likely root cause is a duplicate IPv4 address on PC1 and PC2. Both endpoints are configured with 192.168.10.10. Reassign one endpoint a unique address before further troubleshooting.",
+    "python": "Duplicate IP detected: 192.168.10.10 is assigned to more than one endpoint.",
+    "fix": "Assign PC2 a unique address such as 192.168.10.20, then verify with ping."
+  },
+  {
+    "id": "C02",
+    "fault": "Wrong Subnet Mask",
+    "layer": "Layer 3",
+    "concept": "IPv4 Subnetting",
+    "severity": "Medium",
+    "symptom": "PC2 uses an incorrect subnet mask compared with the intended /24 LAN configuration.",
+    "expected_fault": "Wrong subnet mask",
+    "evidence": [
+      "PC1 mask: 255.255.255.0",
+      "PC2 mask: 255.255.0.0",
+      "R1 interface is 192.168.10.1/24"
+    ],
+    "ai": "PC2 has a subnet mask of 255.255.0.0 while the intended LAN is 192.168.10.0/24. Correct the mask to 255.255.255.0.",
+    "python": "Subnet mask mismatch detected on PC2: expected 255.255.255.0.",
+    "fix": "Set PC2 subnet mask to 255.255.255.0 and retest connectivity."
+  },
+  {
+    "id": "C03",
+    "fault": "Gateway Mismatch",
+    "layer": "Layer 3",
+    "concept": "Default Gateway",
+    "severity": "High",
+    "symptom": "PC2 is configured with a default gateway that does not match the actual router LAN interface.",
+    "expected_fault": "Default gateway mismatch",
+    "evidence": [
+      "PC2 gateway: 192.168.10.254",
+      "R1 G0/0: 192.168.10.1",
+      "Remote-network ping fails"
+    ],
+    "ai": "PC2 is configured with 192.168.10.254 as its gateway, but the router LAN interface is 192.168.10.1. Correct the gateway and retest the remote network.",
+    "python": "Gateway mismatch: configured 192.168.10.254; expected 192.168.10.1.",
+    "fix": "Set PC2 default gateway to 192.168.10.1 and verify access to a remote subnet."
+  },
+  {
+    "id": "C04",
+    "fault": "Interface Down",
+    "layer": "Layer 1/2 impact",
+    "concept": "Interface Status",
+    "severity": "High",
+    "symptom": "The router interface connecting the LAN is administratively shut down.",
+    "expected_fault": "Interface administratively down",
+    "evidence": [
+      "show ip interface brief: G0/0 administratively down/down",
+      "show running-config contains shutdown",
+      "PC pings to 192.168.10.1 fail"
+    ],
+    "ai": "R1 GigabitEthernet0/0 is administratively down. The configuration contains a shutdown state, so the interface must be enabled.",
+    "python": "Interface state rule: GigabitEthernet0/0 is administratively down.",
+    "fix": "Enter interface G0/0 and issue no shutdown, then verify up/up."
+  },
+  {
+    "id": "C05",
+    "fault": "Missing VLAN",
+    "layer": "Layer 2",
+    "concept": "VLAN",
+    "severity": "High",
+    "symptom": "Required VLAN 10 is absent from the switch VLAN database, disrupting the intended access network.",
+    "expected_fault": "VLAN 10 missing",
+    "evidence": [
+      "show vlan brief does not list VLAN 10",
+      "Fa0/1 and Fa0/2 are intended for VLAN 10",
+      "PC-to-PC connectivity is disrupted"
+    ],
+    "ai": "VLAN 10 is missing from the switch VLAN database. Restore VLAN 10 and confirm the affected access ports are assigned correctly.",
+    "python": "Required VLAN 10 not found in switch VLAN table.",
+    "fix": "Create VLAN 10, assign the intended access ports, then verify with show vlan brief."
+  },
+  {
+    "id": "C06",
+    "fault": "Missing Route",
+    "layer": "Layer 3",
+    "concept": "Static Routing",
+    "severity": "High",
+    "symptom": "PC1 cannot reach the remote LAN behind R2, while the router-to-router link remains reachable.",
+    "expected_fault": "R1 missing route to 192.168.20.0/24",
+    "evidence": [
+      "R1 show ip route lacks 192.168.20.0/24",
+      "R1 can ping 10.0.0.2",
+      "PC1 cannot ping 192.168.20.10"
+    ],
+    "ai": "R1 is missing a route to 192.168.20.0/24. The R1-R2 link is reachable, so the next-hop should be 10.0.0.2.",
+    "python": "Missing route detected on R1: 192.168.20.0/24 via 10.0.0.2.",
+    "fix": "Add: ip route 192.168.20.0 255.255.255.0 10.0.0.2, then verify with show ip route and ping."
+  },
+  {
+    "id": "C07",
+    "fault": "DHCP Misconfiguration",
+    "layer": "Layer 3/7",
+    "concept": "DHCP",
+    "severity": "High",
+    "symptom": "Clients receive a DHCP configuration with an incorrect default gateway.",
+    "expected_fault": "DHCP pool default gateway incorrect",
+    "evidence": [
+      "ipconfig shows DHCP-assigned address",
+      "Default gateway received as 192.168.10.254",
+      "DHCP pool is configured for the 192.168.10.0/24 network"
+    ],
+    "ai": "The DHCP scope is handing out an incorrect default gateway. The LAN gateway should be 192.168.10.1.",
+    "python": "DHCP rule mismatch: expected default-router 192.168.10.1.",
+    "fix": "Correct the DHCP pool default-router to 192.168.10.1, renew the client lease, and retest."
+  },
+  {
+    "id": "C08",
+    "fault": "DNS Misconfiguration",
+    "layer": "Layer 7",
+    "concept": "DNS",
+    "severity": "Medium",
+    "symptom": "Direct IP connectivity to the server works, but hostname resolution fails.",
+    "expected_fault": "Incorrect DNS server configured on client",
+    "evidence": [
+      "ping 192.168.10.100 succeeds",
+      "ping server.netsage.local fails",
+      "PC1 DNS server is set to 192.168.10.254 instead of 192.168.10.100"
+    ],
+    "ai": "The server is reachable by IP, but the client points to the wrong DNS server. Set DNS to 192.168.10.100.",
+    "python": "DNS server mismatch: configured 192.168.10.254; expected 192.168.10.100.",
+    "fix": "Set PC1 DNS server to 192.168.10.100 and verify hostname resolution."
+  },
+  {
+    "id": "C09",
+    "fault": "ACL Blocking Traffic",
+    "layer": "Layer 3",
+    "concept": "Access Control List",
+    "severity": "High",
+    "symptom": "ICMP traffic from PC1 to Server1 is blocked while other traffic remains permitted.",
+    "expected_fault": "ACL 101 denies ICMP from PC1 to Server1",
+    "evidence": [
+      "ping 192.168.10.100 fails",
+      "show access-lists shows deny icmp rule",
+      "interface G0/0 has ip access-group 101 in"
+    ],
+    "ai": "ACL 101 explicitly denies ICMP from 192.168.10.10 to 192.168.10.100. The interface is applying the ACL inbound.",
+    "python": "ACL rule match: deny ICMP host 192.168.10.10 to host 192.168.10.100.",
+    "fix": "Review and modify/remove the deny rule as approved by the human reviewer, then verify the ping."
+  },
+  {
+    "id": "C10",
+    "fault": "NAT Misconfiguration",
+    "layer": "Layer 3",
+    "concept": "NAT/PAT",
+    "severity": "High",
+    "symptom": "Inside clients cannot reach the external test network because NAT selection is incorrect.",
+    "expected_fault": "NAT ACL permits wrong inside network",
+    "evidence": [
+      "PC1 cannot ping 198.51.100.1",
+      "show access-lists permits 192.168.20.0/24",
+      "show ip nat translations has no new translation for PC1"
+    ],
+    "ai": "The NAT ACL is matching the wrong source network. Inside clients on 192.168.10.0/24 are not being translated.",
+    "python": "NAT source rule mismatch: expected 192.168.10.0/24 to be selected for translation.",
+    "fix": "Correct the NAT ACL to permit 192.168.10.0/24, clear stale translations if needed, and retest."
+  }
+]
