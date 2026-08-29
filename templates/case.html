@@ -4,57 +4,206 @@
 {% block content %}
 <div class="case-hero">
   <div>
-    <div class="chips"><span>{{ case.layer }}</span><span>{{ case.concept }}</span><span class="sev {{ case.severity|lower }}">{{ case.severity }} severity</span></div>
+    <div class="chips">
+      <span>{{ case.layer }}</span>
+      <span>{{ case.concept }}</span>
+      <span class="sev {{ case.severity|lower }}">{{ case.severity }} severity</span>
+    </div>
     <h2>{{ case.symptom }}</h2>
   </div>
   <a class="btn ghost" href="/cases">← Back to cases</a>
 </div>
 
 <div class="detail-grid">
+
+  <!-- 01 EVIDENCE -->
   <section class="panel">
-    <div class="panel-head"><div><span class="eyebrow">01 · EVIDENCE</span><h3>Packet Tracer observations</h3></div></div>
-    <ul class="evidence-list">{% for e in case.evidence %}<li><span>✓</span>{{ e }}</li>{% endfor %}</ul>
-    <div class="callout"><b>Expected fault</b><p>{{ case.expected_fault }}</p></div>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">01 · EVIDENCE</span>
+        <h3>Packet Tracer observations</h3>
+      </div>
+    </div>
+
+    <ul class="evidence-list">
+      {% for e in case.evidence %}
+      <li><span>✓</span>{{ e }}</li>
+      {% endfor %}
+    </ul>
+
+    <div class="callout">
+      <b>Expected fault</b>
+      <p>{{ case.expected_fault }}</p>
+    </div>
+
+    <div class="evidence-gallery">
+      <div class="gallery-head">
+        <b>Actual Packet Tracer Evidence</b>
+        <small>
+          {% if evidence_files %}
+            {{ evidence_files|length }} image(s)
+          {% else %}
+            No evidence images uploaded yet.
+          {% endif %}
+        </small>
+      </div>
+
+      {% if evidence_files %}
+      <div class="gallery-grid">
+        {% for img in evidence_files %}
+        <a href="{{ img.url }}" target="_blank" rel="noopener">
+          <img
+            src="{{ img.url }}"
+            alt="{{ case.id }} evidence — {{ img.name }}"
+          >
+          <span>{{ img.name }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="gallery-empty">
+        No screenshot uploaded yet.
+      </div>
+      {% endif %}
+    </div>
   </section>
 
+  <!-- 02 PYTHON -->
   <section class="panel">
-    <div class="panel-head"><div><span class="eyebrow">02 · PYTHON</span><h3>Deterministic rule check</h3></div></div>
-    <div class="terminal"><div class="terminal-bar"><span></span><span></span><span></span><em>netsage_checker.py</em></div><pre id="pythonResult">{{ case.python }}</pre></div>
-    <button class="btn secondary" onclick="runCheck('{{ case.id }}')">Run Python check</button>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">02 · PYTHON</span>
+        <h3>Deterministic rule check</h3>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span></span>
+        <span></span>
+        <span></span>
+        <em>netsage_checker.py</em>
+      </div>
+      <pre id="pythonResult">{{ case.python }}</pre>
+    </div>
+
+    <button
+      class="btn secondary"
+      onclick="runCheck('{{ case.id }}')">
+      Run Python check
+    </button>
+
     <div id="pythonStatus" class="inline-status"></div>
   </section>
 
+  <!-- 03 AI -->
   <section class="panel">
-    <div class="panel-head"><div><span class="eyebrow">03 · AI DIAGNOSIS</span><h3>Structured troubleshooting answer</h3></div></div>
-    <div class="ai-card">
-      <div class="ai-line"><b>Root cause</b><span>{{ case.ai }}</span></div>
-      <div class="ai-line"><b>Confidence</b><span>High — supported by the listed evidence</span></div>
-      <div class="ai-line"><b>Next action</b><span>Verify the relevant Cisco/endpoint evidence before changing configuration.</span></div>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">03 · AI DIAGNOSIS</span>
+        <h3>Structured troubleshooting answer</h3>
+      </div>
     </div>
-    <button class="btn secondary" onclick="copyPrompt('{{ case.id }}')">Copy AI prompt</button>
+
+    <div class="ai-card">
+      <div class="ai-line">
+        <b>Root cause</b>
+        <span>{{ case.ai }}</span>
+      </div>
+
+      <div class="ai-line">
+        <b>Confidence</b>
+        <span>High — supported by the listed evidence</span>
+      </div>
+
+      <div class="ai-line">
+        <b>Next action</b>
+        <span>
+          Verify the relevant Cisco/endpoint evidence before changing configuration.
+        </span>
+      </div>
+    </div>
+
+    <button
+      class="btn secondary"
+      onclick="copyPrompt('{{ case.id }}')">
+      Copy AI prompt
+    </button>
+
     <div id="promptStatus" class="inline-status"></div>
   </section>
 
+  <!-- 04 HUMAN REVIEW -->
   <section class="panel">
-    <div class="panel-head"><div><span class="eyebrow">04 · HUMAN REVIEW</span><h3>Final engineering decision</h3></div></div>
-    <label>Decision</label>
-    <div class="review-buttons">
-      <button onclick="setDecision(this,'Accepted')" class="review-btn">Accept</button>
-      <button onclick="setDecision(this,'Edited')" class="review-btn">Edit</button>
-      <button onclick="setDecision(this,'Rejected')" class="review-btn">Reject</button>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">04 · HUMAN REVIEW</span>
+        <h3>Final engineering decision</h3>
+      </div>
     </div>
+
+    <label>Decision</label>
+
+    <div class="review-buttons">
+      <button
+        onclick="setDecision(this,'Accepted')"
+        class="review-btn">
+        Accept
+      </button>
+
+      <button
+        onclick="setDecision(this,'Edited')"
+        class="review-btn">
+        Edit
+      </button>
+
+      <button
+        onclick="setDecision(this,'Rejected')"
+        class="review-btn">
+        Reject
+      </button>
+    </div>
+
     <label>Reviewer note</label>
-    <textarea id="reviewNote" placeholder="Explain why the AI recommendation was accepted, edited, or rejected."></textarea>
-    <button class="btn primary" onclick="saveReview('{{ case.id }}')">Save human review</button>
+
+    <textarea
+      id="reviewNote"
+      placeholder="Explain why the AI recommendation was accepted, edited, or rejected.">
+    </textarea>
+
+    <button
+      class="btn primary"
+      onclick="saveReview('{{ case.id }}')">
+      Save human review
+    </button>
+
     <div id="reviewSaved" class="inline-status"></div>
   </section>
 
+  <!-- 05 FIX + VERIFY -->
   <section class="panel full">
-    <div class="panel-head"><div><span class="eyebrow">05 · APPLY + VERIFY</span><h3>Recommended fix and verification</h3></div></div>
+    <div class="panel-head">
+      <div>
+        <span class="eyebrow">05 · APPLY + VERIFY</span>
+        <h3>Recommended fix and verification</h3>
+      </div>
+    </div>
+
     <div class="fix-grid">
-      <div><small>Recommended fix</small><p>{{ case.fix }}</p></div>
-      <div><small>Verification</small><p>Apply the approved change in Packet Tracer, repeat the failing test, and capture the successful output as final evidence.</p></div>
+      <div>
+        <small>Recommended fix</small>
+        <p>{{ case.fix }}</p>
+      </div>
+
+      <div>
+        <small>Verification</small>
+        <p>
+          Apply the approved change in Packet Tracer, repeat the failing
+          test, and capture the successful output as final evidence.
+        </p>
+      </div>
     </div>
   </section>
+
 </div>
 {% endblock %}
